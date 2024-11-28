@@ -5,9 +5,13 @@ import numpy as np
 from io import BytesIO
 from PIL import Image
 from ML_damage.damageClassification import RoadDamageML
+from ML_damage.videoDamageAnalysis import VideoDamageAnalyzer  # Import the video analysis module
 
+# Initialize models
 road_damage_ml = RoadDamageML()
+video_analyzer = VideoDamageAnalyzer()
 
+# Create FastAPI app
 app = FastAPI()
 
 # Set CORS origins to allow cross-origin requests
@@ -46,8 +50,7 @@ async def predict(response: Response, file: UploadFile = File(...), damage_type:
         damage = road_damage_ml.predict(image, damage_type)
         if damage:
             return {
-                'class': damage,
-                # 'debug': f"Prediction successful for damage type: {damage_type}"
+                'class': damage
             }
         else:
             response.status_code = status.HTTP_400_BAD_REQUEST
@@ -64,6 +67,32 @@ async def predict(response: Response, file: UploadFile = File(...), damage_type:
                 'model_dict_keys': list(road_damage_ml.model_dict.keys()),
                 'input_damage_type': damage_type
             }
+        }
+
+@app.post("/analyze-video", status_code=status.HTTP_200_OK)
+async def analyze_video(response: Response, file: UploadFile = File(...), damage_type: str = Form(...)):
+    """
+    Analyze a video for road damage classifications.
+    """
+    try:
+        # Save the uploaded video to a temporary file
+        video_path = f"/tmp/{file.filename}"  # Temporary storage for uploaded video
+        with open(video_path, "wb") as f:
+            f.write(await file.read())
+
+        # Perform video analysis
+        analysis_results = video_analyzer.analyze_video(video_path, damage_type)
+        return analysis_results
+
+    except ValueError as ve:
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return {
+            "message": f"Bad Request: {str(ve)}"
+        }
+    except Exception as e:
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return {
+            "message": f"Error analyzing video: {str(e)}"
         }
 
 if __name__ == "__main__":
