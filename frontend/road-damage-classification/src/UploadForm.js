@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const UploadForm = () => {
     const [file, setFile] = useState(null);
     const [damageType, setDamageType] = useState('Road');
-    const [fileType, setFileType] = useState('video'); // 'video' or 'image'
+    const [fileType, setFileType] = useState('video');
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState(null);
 
-    // Handle file input change
+    const [threshold, setThreshold] = useState(60); // Threshold for poor/very poor road conditions
+
     const onFileChange = (e) => {
         setFile(e.target.files[0]);
     };
 
-    // Handle damage type change (default to "Road")
     const onDamageTypeChange = (e) => {
         setDamageType(e.target.value);
     };
 
-    // Handle file type change (select between video or image)
     const onFileTypeChange = (e) => {
         setFileType(e.target.value);
     };
 
-    // Handle form submit
     const handleSubmit = async (e) => {
         e.preventDefault();
 
@@ -41,27 +43,50 @@ const UploadForm = () => {
         formData.append('file', file);
         formData.append('damage_type', damageType);
 
-        const apiUrl = fileType === 'video' ? '/api/analyze-video' : '/api/predict'; // Choose endpoint based on file type
+        const apiUrl = fileType === 'video' ? '/api/analyze-video' : '/api/predict';
 
         try {
             setLoading(true);
 
-            // Axios POST request to the backend
             const result = await axios.post(apiUrl, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
-            // Handle successful response
+            console.log("API Response:", result.data); // Log the response to check its structure
             setResponse(result.data);
             setLoading(false);
         } catch (error) {
-            // Handle error
             console.error('Error uploading file:', error.response || error.message);
             setResponse({ error: 'Failed to upload file' });
             setLoading(false);
         }
+    };
+
+    // Prepare the chart data
+    const chartData = {
+        labels: ['Very Poor', 'Poor', 'Moderate', 'Good', 'Very Good'],
+        datasets: [
+            {
+                label: 'Damage Percentage',
+                data: response && Array.isArray(response.percentages) ? response.percentages : [0, 0, 0, 0, 0], // Default to zeroes if response is undefined
+                backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1,
+            },
+        ],
+    };
+
+    // Prepare the chart options
+    const chartOptions = {
+        responsive: true,
+        scales: {
+            y: {
+                beginAtZero: true,
+                max: 100,
+            },
+        },
     };
 
     return (
@@ -99,12 +124,32 @@ const UploadForm = () => {
                     {response.error ? (
                         <p style={{ color: 'red' }}>{response.error}</p>
                     ) : (
-                        <pre>{JSON.stringify(response, null, 2)}</pre>
+                        <div>
+                            <h4>Damage Analysis Results</h4>
+                            <Bar data={chartData} options={chartOptions} />
+                            <h5>Location: {response.location || 'N/A'}</h5> {/* Handle missing location */}
+                            <h5>Damage Threshold Status: {getDamageStatus(response.percentages)}</h5>
+                        </div>
                     )}
                 </div>
             )}
         </div>
     );
+
+    // Determine if the damage exceeds the threshold
+    function getDamageStatus(percentages) {
+        // Check if percentages exists and has at least two values
+        if (!Array.isArray(percentages) || percentages.length < 2) {
+            return 'Invalid data'; // Or any other fallback message
+        }
+
+        const poorPercentage = percentages[0] + percentages[1]; // Very Poor + Poor
+        if (poorPercentage > threshold) {
+            return 'High Priority for Repair';
+        } else {
+            return 'No Immediate Action Required';
+        }
+    }
 };
 
 export default UploadForm;
