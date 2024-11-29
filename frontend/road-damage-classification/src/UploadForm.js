@@ -11,7 +11,6 @@ const UploadForm = () => {
     const [fileType, setFileType] = useState('video');
     const [loading, setLoading] = useState(false);
     const [response, setResponse] = useState(null);
-
     const [threshold, setThreshold] = useState(60); // Threshold for poor/very poor road conditions
 
     const onFileChange = (e) => {
@@ -43,7 +42,7 @@ const UploadForm = () => {
         formData.append('file', file);
         formData.append('damage_type', damageType);
 
-        const apiUrl = fileType === 'video' ? '/api/analyze-video' : '/api/predict';
+        const apiUrl = fileType === 'video' ? 'http://127.0.0.1:8000/analyze-video' : 'http://127.0.0.1:8000/predict';
 
         try {
             setLoading(true);
@@ -66,19 +65,35 @@ const UploadForm = () => {
 
     // Prepare the chart data
     const chartData = {
-        labels: ['Very Poor', 'Poor', 'Moderate', 'Good', 'Very Good'],
+        labels: ['Very Poor', 'Poor', 'Satisfactory', 'Good'],
         datasets: [
             {
                 label: 'Damage Percentage',
-                data: response && Array.isArray(response.percentages) ? response.percentages : [0, 0, 0, 0, 0], // Default to zeroes if response is undefined
-                backgroundColor: 'rgba(75, 192, 192, 0.6)',
-                borderColor: 'rgba(75, 192, 192, 1)',
+                data: response?.summary
+                    ? [
+                          response.summary['very poor'],
+                          response.summary.poor,
+                          response.summary.satisfactory,
+                          response.summary.good,
+                      ]
+                    : [0, 0, 0, 0], // Default to zeroes if response is undefined
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(255, 159, 64, 0.6)',
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(54, 162, 235, 0.6)',
+                ],
+                borderColor: [
+                    'rgba(255, 99, 132, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(54, 162, 235, 1)',
+                ],
                 borderWidth: 1,
             },
         ],
     };
 
-    // Prepare the chart options
     const chartOptions = {
         responsive: true,
         scales: {
@@ -95,14 +110,14 @@ const UploadForm = () => {
             <form onSubmit={handleSubmit}>
                 <div>
                     <label>Choose a file:</label>
-                    <input type="file" onChange={onFileChange} accept={fileType === 'video' ? "video/*" : "image/*"} />
+                    <input type="file" onChange={onFileChange} accept={fileType === 'video' ? 'video/*' : 'image/*'} />
                 </div>
                 <div>
                     <label>Damage Type:</label>
-                    <input 
-                        type="text" 
-                        placeholder="e.g., Road" 
-                        value={damageType} 
+                    <input
+                        type="text"
+                        placeholder="e.g., Road"
+                        value={damageType}
                         onChange={onDamageTypeChange}
                     />
                 </div>
@@ -113,22 +128,22 @@ const UploadForm = () => {
                         <option value="image">Image</option>
                     </select>
                 </div>
-                <button type="submit" disabled={loading}>Upload</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Uploading...' : 'Upload'}
+                </button>
             </form>
-
-            {loading && <p>Uploading...</p>}
 
             {response && (
                 <div>
-                    <h3>Analysis Response:</h3>
+                    <h3>Analysis Results:</h3>
                     {response.error ? (
                         <p style={{ color: 'red' }}>{response.error}</p>
                     ) : (
                         <div>
-                            <h4>Damage Analysis Results</h4>
                             <Bar data={chartData} options={chartOptions} />
-                            <h5>Location: {response.location || 'N/A'}</h5> {/* Handle missing location */}
-                            <h5>Damage Threshold Status: {getDamageStatus(response.percentages)}</h5>
+                            <h4>Total Frames: {response.total_frames}</h4>
+                            <h4>Analyzed Frames: {response.analyzed_frames}</h4>
+                            <h4>Damage Threshold Status: {getDamageStatus(response.summary)}</h4>
                         </div>
                     )}
                 </div>
@@ -137,18 +152,9 @@ const UploadForm = () => {
     );
 
     // Determine if the damage exceeds the threshold
-    function getDamageStatus(percentages) {
-        // Check if percentages exists and has at least two values
-        if (!Array.isArray(percentages) || percentages.length < 2) {
-            return 'Invalid data'; // Or any other fallback message
-        }
-
-        const poorPercentage = percentages[0] + percentages[1]; // Very Poor + Poor
-        if (poorPercentage > threshold) {
-            return 'High Priority for Repair';
-        } else {
-            return 'No Immediate Action Required';
-        }
+    function getDamageStatus(summary) {
+        const poorPercentage = summary ? summary.poor + summary['very poor'] : 0;
+        return poorPercentage > threshold ? 'High Priority for Repair' : 'No Immediate Action Required';
     }
 };
 

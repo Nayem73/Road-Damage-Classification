@@ -16,7 +16,8 @@ app = FastAPI()
 
 # Set CORS origins to allow cross-origin requests
 origins = [
-    'http://spring-boot-app'
+    'http://spring-boot-app',
+    'http://localhost:3000',  # Add your frontend's URL here
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -82,7 +83,33 @@ async def analyze_video(response: Response, file: UploadFile = File(...), damage
 
         # Perform video analysis
         analysis_results = video_analyzer.analyze_video(video_path, damage_type)
-        return analysis_results
+
+        # Format data for mapping and clear output
+        geotags = analysis_results["geotags"]
+        geojson_features = [
+            {
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [tag["longitude"], tag["latitude"]]
+                },
+                "properties": {
+                    "frame": tag["frame"],
+                    "damage": tag["damage"]
+                }
+            }
+            for tag in geotags
+        ]
+
+        return {
+            "summary": analysis_results["summary"],
+            "total_frames": analysis_results["total_frames"],
+            "analyzed_frames": analysis_results["analyzed_frames"],
+            "geojson": {
+                "type": "FeatureCollection",
+                "features": geojson_features
+            }
+        }
 
     except ValueError as ve:
         response.status_code = status.HTTP_400_BAD_REQUEST
