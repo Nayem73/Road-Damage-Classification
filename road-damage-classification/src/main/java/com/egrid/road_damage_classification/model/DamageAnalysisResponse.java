@@ -1,72 +1,149 @@
 package com.egrid.road_damage_classification.model;
 
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DamageAnalysisResponse {
-    private Map<String, Double> summary;
-    private int totalFrames;
-    private int analyzedFrames;
-    private Map<String, Integer> damageCounts;
-    private Map<String, Double> damagePercentage;
-    private String[] criticalFrames;
+    @JsonProperty("summary")
+    private Summary summary;
 
-    public DamageAnalysisResponse() {
-    }
+    @JsonProperty("total_frames")
+    private Integer totalFrames;
 
-    public DamageAnalysisResponse(Map<String, Double> summary, int totalFrames, int analyzedFrames, Map<String, Integer> damageCounts, Map<String, Double> damagePercentage, String[] criticalFrames) {
-        this.summary = summary;
-        this.totalFrames = totalFrames;
-        this.analyzedFrames = analyzedFrames;
-        this.damageCounts = damageCounts;
-        this.damagePercentage = damagePercentage;
-        this.criticalFrames = criticalFrames;
-    }
+    @JsonProperty("analyzed_frames")
+    private Integer analyzedFrames;
 
-    public Map<String, Double> getSummary() {
+    @JsonProperty("damage_counts")
+    private DamageCounts damageCounts;
+
+    @JsonProperty("damage_percentage")
+    private Double damagePercentage;
+
+    @JsonProperty("critical_frames")
+    private Integer criticalFrames;
+
+    // Getters and setters
+    public Summary getSummary() {
         return summary;
     }
 
-    public void setSummary(Map<String, Double> summary) {
+    public void setSummary(Summary summary) {
         this.summary = summary;
     }
 
-    public int getTotalFrames() {
+    public Integer getTotalFrames() {
         return totalFrames;
     }
 
-    public void setTotalFrames(int totalFrames) {
+    public void setTotalFrames(Integer totalFrames) {
         this.totalFrames = totalFrames;
     }
 
-    public int getAnalyzedFrames() {
+    public Integer getAnalyzedFrames() {
         return analyzedFrames;
     }
 
-    public void setAnalyzedFrames(int analyzedFrames) {
+    public void setAnalyzedFrames(Integer analyzedFrames) {
         this.analyzedFrames = analyzedFrames;
     }
 
-    public Map<String, Integer> getDamageCounts() {
+    public DamageCounts getDamageCounts() {
         return damageCounts;
     }
 
-    public void setDamageCounts(Map<String, Integer> damageCounts) {
+    public void setDamageCounts(DamageCounts damageCounts) {
         this.damageCounts = damageCounts;
     }
 
-    public Map<String, Double> getDamagePercentage() {
+    public Double getDamagePercentage() {
         return damagePercentage;
     }
 
-    public void setDamagePercentage(Map<String, Double> damagePercentage) {
+    public void setDamagePercentage(Double damagePercentage) {
         this.damagePercentage = damagePercentage;
     }
 
-    public String[] getCriticalFrames() {
+    public Integer getCriticalFrames() {
         return criticalFrames;
     }
 
-    public void setCriticalFrames(String[] criticalFrames) {
+    public void setCriticalFrames(Integer criticalFrames) {
         this.criticalFrames = criticalFrames;
+    }
+
+    // Nested classes
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class DamageCounts {
+        @JsonProperty("good")
+        private Integer good;
+
+        @JsonProperty("poor")
+        private Integer poor;
+
+        // Getters and setters
+        public Integer getGood() {
+            return good;
+        }
+
+        public void setGood(Integer good) {
+            this.good = good;
+        }
+
+        public Integer getPoor() {
+            return poor;
+        }
+
+        public void setPoor(Integer poor) {
+            this.poor = poor;
+        }
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Summary {
+        @JsonProperty("good")
+        private Double good;
+
+        @JsonProperty("poor")
+        private Double poor;
+
+        @JsonProperty("satisfactory")
+        private Double satisfactory;
+
+        @JsonProperty("very_poor")
+        private Double veryPoor;
+
+        // Getters and setters
+        public Double getGood() {
+            return good;
+        }
+
+        public void setGood(Double good) {
+            this.good = good;
+        }
+
+        public Double getPoor() {
+            return poor;
+        }
+
+        public void setPoor(Double poor) {
+            this.poor = poor;
+        }
+
+        public Double getSatisfactory() {
+            return satisfactory;
+        }
+
+        public void setSatisfactory(Double satisfactory) {
+            this.satisfactory = satisfactory;
+        }
+
+        public Double getVeryPoor() {
+            return veryPoor;
+        }
+
+        public void setVeryPoor(Double veryPoor) {
+            this.veryPoor = veryPoor;
+        }
     }
 }

@@ -60,7 +60,10 @@ class VideoDamageAnalyzer:
         # Count occurrences of each damage type
         damage_counts = Counter(frame_results)
         total_frames = sum(damage_counts.values())
-        summary = {key: (count / total_frames) * 100 for key, count in damage_counts.items()}
+        # summary = {key: (count / total_frames) * 100 for key, count in damage_counts.items()}
+        summary = {key: (damage_counts.get(key, 0) / total_frames) * 100 
+           for key in self.model.class_name_dict[damage_type]}
+
 
         return {
             "summary": summary,
