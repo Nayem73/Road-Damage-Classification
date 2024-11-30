@@ -5,7 +5,7 @@ import { Bar } from 'react-chartjs-2';
 import 'leaflet/dist/leaflet.css';
 import 'chart.js/auto';
 import L from 'leaflet';
-import { FaRoad, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
+import { FaRoad, FaCheckCircle } from 'react-icons/fa';
 
 // Utility to create dynamic icon sizes based on feature count
 const createDynamicIcon = (damage, featureCount) => {
@@ -54,7 +54,6 @@ const extractCoordinates = (geojson) => {
 
 const UploadForm = () => {
   const [file, setFile] = useState(null);
-  const [damageType, setDamageType] = useState('Road');
   const [loading, setLoading] = useState(false);
   const [responseData, setResponseData] = useState(null);
   const [mapCenter, setMapCenter] = useState([35.6895, 139.6917]);
@@ -62,7 +61,6 @@ const UploadForm = () => {
   const [error, setError] = useState(null);
 
   const handleFileChange = (e) => setFile(e.target.files[0]);
-  const handleDamageTypeChange = (e) => setDamageType(e.target.value);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -75,7 +73,7 @@ const UploadForm = () => {
 
     const formData = new FormData();
     formData.append('file', file);
-    formData.append('damage_type', damageType);
+    formData.append('damage_type', 'Road'); // Hardcoded damage type
 
     try {
       setLoading(true);
@@ -167,16 +165,6 @@ const UploadForm = () => {
           <div className="form-group">
             <label><FaRoad /> Upload Dashcam Video</label>
             <input type="file" onChange={handleFileChange} accept="video/*" className="file-input" />
-          </div>
-          <div className="form-group">
-            <label><FaExclamationTriangle /> Damage Type</label>
-            <input
-              type="text"
-              value={damageType}
-              onChange={handleDamageTypeChange}
-              placeholder="e.g., Road"
-              className="damage-input"
-            />
           </div>
           <button type="submit" disabled={loading} className="analyze-button">
             {loading ? 'Analyzing...' : 'Analyze Video'}
