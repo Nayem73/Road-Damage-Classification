@@ -163,7 +163,7 @@ const UploadForm = () => {
       <div className="upload-form">
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Upload Dashcam Video</label>
+            <label><FaRoad /> Upload Dashcam Video</label>
             <input type="file" onChange={handleFileChange} accept="video/*" className="file-input" />
           </div>
           <button type="submit" disabled={loading} className="analyze-button">
