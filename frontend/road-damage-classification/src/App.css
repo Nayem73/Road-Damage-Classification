@@ -51,12 +51,14 @@ body {
 }
 
 .analyze-button {
-  padding: 14px 36px;
-  font-size: 16px;
+  padding: 12px 30px;
+  /* Slightly smaller padding */
+  font-size: 14px;
+  /* Slightly smaller font size */
   background-color: #333;
   color: white;
   border: 2px solid transparent;
-  /* Start with a transparent border */
+  /* Maintain border size but invisible */
   border-radius: 6px;
   cursor: pointer;
   box-sizing: border-box;
