@@ -96,3 +96,22 @@ body {
   margin-top: 15px;
   text-align: center;
 }
+
+.app-header {
+  display: flex;
+  align-items: center;
+  background-color: #0078d7;
+  color: white;
+  padding: 20px;
+  border-bottom: 4px solid #005cbf;
+}
+
+.logo {
+  height: 60px;
+  margin-right: 20px;
+}
+
+.app-header h1 {
+  font-size: 1.8rem;
+  margin: 0;
+}
