@@ -12,8 +12,8 @@ class VideoDamageAnalyzer:
         self.model = RoadDamageML()
         
         # Initial starting coordinates (kept for reference)
-        self.start_latitude = 35.38673905468399
-        self.start_longitude = 132.73381553054398
+        self.start_latitude = 35.36224068841722
+        self.start_longitude = 132.71898483735194
 
     def generate_realistic_road_path(self, num_frames):
         """
