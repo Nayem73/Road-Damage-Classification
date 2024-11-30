@@ -1,10 +1,16 @@
 import React from 'react';
-import UploadForm from './UploadForm';
+import UploadForm from './components/UploadForm';
+import './styles/styles.css';
 
 function App() {
     return (
         <div className="App">
-            <UploadForm />
+            <header>
+                <h1>Road Damage Analysis</h1>
+            </header>
+            <main>
+                <UploadForm />
+            </main>
         </div>
     );
 }

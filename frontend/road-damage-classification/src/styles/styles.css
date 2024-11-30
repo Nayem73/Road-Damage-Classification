@@ -1,0 +1,57 @@
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background: #f4f4f4;
+}
+
+header {
+    background: #0078d7;
+    color: white;
+    padding: 20px;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+}
+
+.upload-form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: auto;
+}
+
+.upload-form label {
+    font-weight: bold;
+}
+
+.upload-form input {
+    margin-bottom: 10px;
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.upload-form button {
+    padding: 10px 20px;
+    background: #0078d7;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.results-container {
+    margin-top: 20px;
+}
+
+.map-container {
+    margin-top: 20px;
+}
+
+.chart-container {
+    margin-top: 20px;
+}
