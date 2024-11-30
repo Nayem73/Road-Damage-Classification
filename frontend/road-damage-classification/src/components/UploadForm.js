@@ -48,9 +48,6 @@ const extractCoordinates = (geojson) => {
 
 // Custom Icon for Markers
 const getDamageIcon = (damage) => {
-  const iconSize = [40, 40];
-  const iconAnchor = [20, 40];
-  
   const iconColors = {
     'very poor': '#FF0000',
     'poor': '#FFA500',
@@ -58,13 +55,18 @@ const getDamageIcon = (damage) => {
     'good': '#00FF00'
   };
 
-  return new Icon({
-    iconUrl: 'data:image/svg+xml;utf8,' + encodeURIComponent(`
-      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="${iconColors[damage] || '#808080'}">
-        <path d="M12 2 L2 22 L22 22 Z"/>
-      </svg>`),
-    iconSize,
-    iconAnchor
+  return new L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div style="
+      width: 20px; 
+      height: 20px; 
+      border-radius: 50%; 
+      background-color: ${iconColors[damage] || '#808080'}; 
+      border: 2px solid white; 
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    "></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
   });
 };
 
