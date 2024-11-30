@@ -5,19 +5,51 @@ import { Bar } from 'react-chartjs-2';
 import 'leaflet/dist/leaflet.css';
 import 'chart.js/auto';
 import L from 'leaflet';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-import { Icon } from 'leaflet';
 import { FaRoad, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 
-// Reset Leaflet's default icon
-delete L.Icon.Default.prototype._getIconUrl;
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: markerIcon2x,
-    iconUrl: markerIcon,
-    shadowUrl: markerShadow,
+// Import default Leaflet icons explicitly
+import iconUrl from 'leaflet/dist/images/marker-icon.png';
+import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
+import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
+
+// Create a custom default icon with minimal visibility
+const DefaultIcon = L.icon({
+  iconUrl,
+  iconRetinaUrl,
+  shadowUrl,
+  iconSize: [0, 0],     // Make icon invisible
+  shadowSize: [0, 0],   // Hide shadow
+  iconAnchor: [0, 0],   // Anchor at top-left corner
+  shadowAnchor: [0, 0], // Hide shadow anchor
+  popupAnchor: [0, 0]   // Hide popup anchor
 });
+
+// Set the default icon for all markers
+L.Marker.prototype.options.icon = DefaultIcon;
+
+// Custom Icon for Markers
+const getDamageIcon = (damage) => {
+  const iconColors = {
+    'very poor': '#FF0000',
+    'poor': '#FFA500',
+    'satisfactory': '#FFD700',
+    'good': '#00FF00'
+  };
+
+  return L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div style="
+      width: 20px; 
+      height: 20px; 
+      border-radius: 50%; 
+      background-color: ${iconColors[damage] || '#808080'}; 
+      border: 2px solid white; 
+      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    "></div>`,
+    iconSize: [30, 30],
+    iconAnchor: [15, 15]
+  });
+};
 
 // Utility function to safely extract coordinates
 const extractCoordinates = (geojson) => {
@@ -44,30 +76,6 @@ const extractCoordinates = (geojson) => {
     console.error('Error extracting coordinates:', error);
     return [35.6895, 139.6917]; // Fallback to default
   }
-};
-
-// Custom Icon for Markers
-const getDamageIcon = (damage) => {
-  const iconColors = {
-    'very poor': '#FF0000',
-    'poor': '#FFA500',
-    'satisfactory': '#FFD700',
-    'good': '#00FF00'
-  };
-
-  return new L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div style="
-      width: 20px; 
-      height: 20px; 
-      border-radius: 50%; 
-      background-color: ${iconColors[damage] || '#808080'}; 
-      border: 2px solid white; 
-      box-shadow: 0 0 5px rgba(0,0,0,0.5);
-    "></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
-  });
 };
 
 const UploadForm = () => {
