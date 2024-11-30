@@ -17,7 +17,7 @@ class VideoDamageAnalyzer:
 
     def generate_realistic_road_path(self, num_frames):
         """
-        Generate a road-like path with more flexible movement.
+        Generate a road-like path with tighter, more compact movement.
         
         :param num_frames: Number of frames to generate geotags for
         :return: List of geotags simulating a road trajectory
@@ -26,16 +26,16 @@ class VideoDamageAnalyzer:
         current_lat = self.start_latitude
         current_lon = self.start_longitude
         
-        # Road-like movement parameters
-        lat_step = 0.0001  # Latitude change
-        lon_step = 0.0002  # Longitude change
+        # Reduced road-like movement parameters
+        lat_step = 0.00005  # Reduced latitude change (half of previous)
+        lon_step = 0.0001   # Reduced longitude change (half of previous)
         
         for _ in range(num_frames):
-            # Add controlled randomness
-            lat_variation = random.uniform(-0.0005, 0.0005)
-            lon_variation = random.uniform(-0.0005, 0.0005)
+            # Reduced variation range
+            lat_variation = random.uniform(-0.0002, 0.0002)
+            lon_variation = random.uniform(-0.0002, 0.0002)
             
-            # Update coordinates without strict constraints
+            # Update coordinates with smaller steps
             new_lat = current_lat + lat_step + lat_variation
             new_lon = current_lon + lon_step + lon_variation
             
