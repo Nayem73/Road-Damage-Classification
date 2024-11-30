@@ -112,7 +112,7 @@ const UploadForm = () => {
             responseData.summary['satisfactory'] || 0,
             responseData.summary['good'] || 0,
           ],
-          backgroundColor: ['#FF6384', '#FF9F40', '#FFCD56', '#36A2EB'],
+          backgroundColor: ['#FF0000', '#FFA500', '#FFD700', '#00FF00'],
         },
       ],
     };
