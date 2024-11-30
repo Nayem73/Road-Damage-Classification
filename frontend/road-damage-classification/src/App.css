@@ -1,38 +1,98 @@
-.App {
-  text-align: center;
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7f6;
+  color: #333;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.upload-form-container {
+  max-width: 800px;
+  margin: 40px auto;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 30px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.upload-form {
   display: flex;
   flex-direction: column;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.form-group label svg {
+  margin-right: 10px;
+}
+
+.file-input,
+.damage-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  transition: border-color 0.3s;
+}
+
+.file-input:focus,
+.damage-input:focus {
+  outline: none;
+  border-color: #0078d7;
+}
+
+.analyze-button {
+  padding: 12px 24px;
+  background-color: #0078d7;
   color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s;
 }
 
-.App-link {
-  color: #61dafb;
+.analyze-button:hover {
+  background-color: #005cbf;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.results-container {
+  margin-top: 30px;
+}
+
+.chart-container,
+.map-container {
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.chart-container h3,
+.map-container h3 {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.chart-container h3 svg,
+.map-container h3 svg {
+  margin-right: 10px;
+}
+
+.error-message {
+  background-color: #ffdddd;
+  color: #ff0000;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 15px;
+  text-align: center;
 }

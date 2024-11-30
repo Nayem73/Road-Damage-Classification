@@ -14,7 +14,7 @@ const SummaryChart = ({ summary }) => {
                     summary['satisfactory'] || 0,
                     summary['good'] || 0,
                 ],
-                backgroundColor: ['#FF6384', '#FF9F40', '#FFCD56', '#36A2EB'],
+                backgroundColor: ['#FF0000', '#FF9900', '#FFFF00', '#00FF00'],
             },
         ],
     };
