@@ -11,19 +11,13 @@ class VideoDamageAnalyzer:
         """
         self.model = RoadDamageML()
         
-        # E-Grid's location in Izumo, Shimane
+        # Initial starting coordinates (kept for reference)
         self.start_latitude = 35.38673905468399
         self.start_longitude = 132.73381553054398
-        
-        # Define geographic constraints for Izumo area
-        self.min_latitude = 35.38  # Minimal vertical variation
-        self.max_latitude = 35.39  # Minimal vertical variation
-        self.min_longitude = 132.73  # Western starting boundary
-        self.max_longitude = 132.76  # Eastern boundary
 
     def generate_realistic_road_path(self, num_frames):
         """
-        Generate a constrained, road-like path going east from Izumo.
+        Generate a road-like path with more flexible movement.
         
         :param num_frames: Number of frames to generate geotags for
         :return: List of geotags simulating a road trajectory
@@ -32,22 +26,18 @@ class VideoDamageAnalyzer:
         current_lat = self.start_latitude
         current_lon = self.start_longitude
         
-        # Road-like movement parameters for eastward movement
-        lat_step = 0.0001  # Minimal latitude change
-        lon_step = 0.0002   # More significant longitude (east) change
+        # Road-like movement parameters
+        lat_step = 0.0001  # Latitude change
+        lon_step = 0.0002  # Longitude change
         
         for _ in range(num_frames):
             # Add controlled randomness
-            lat_variation = random.uniform(-0.00005, 0.00005)
-            lon_variation = random.uniform(-0.00005, 0.00005)
+            lat_variation = random.uniform(-0.0005, 0.0005)
+            lon_variation = random.uniform(-0.0005, 0.0005)
             
-            # Update coordinates with constraints
+            # Update coordinates without strict constraints
             new_lat = current_lat + lat_step + lat_variation
             new_lon = current_lon + lon_step + lon_variation
-            
-            # Enforce geographic boundaries
-            new_lat = max(self.min_latitude, min(new_lat, self.max_latitude))
-            new_lon = max(self.min_longitude, min(new_lon, self.max_longitude))
             
             # Update current coordinates
             current_lat = new_lat

@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import axios from 'axios';
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import { Bar } from 'react-chartjs-2';
 import 'leaflet/dist/leaflet.css';
 import 'chart.js/auto';
@@ -12,46 +12,31 @@ import iconUrl from 'leaflet/dist/images/marker-icon.png';
 import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
 import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
 
-// Create a custom default icon with minimal visibility
-const DefaultIcon = L.icon({
-  iconUrl,
-  iconRetinaUrl,
-  shadowUrl,
-  iconSize: [0, 0],     // Make icon invisible
-  shadowSize: [0, 0],   // Hide shadow
-  iconAnchor: [0, 0],   // Anchor at top-left corner
-  shadowAnchor: [0, 0], // Hide shadow anchor
-  popupAnchor: [0, 0]   // Hide popup anchor
-});
-
-// Set the default icon for all markers
-L.Marker.prototype.options.icon = DefaultIcon;
-
-// Custom Icon for Markers
-const getDamageIcon = (damage) => {
+// Utility to create dynamic icon sizes based on feature count
+const createDynamicIcon = (damage, featureCount) => {
   const iconColors = {
     'very poor': '#FF0000',
     'poor': '#FFA500',
     'satisfactory': '#FFD700',
-    'good': '#00FF00'
+    'good': '#00FF00',
   };
 
+  const baseSize = Math.max(5, 20 - Math.log10(featureCount) * 5); // Adjust size dynamically
   return L.divIcon({
     className: 'custom-div-icon',
     html: `<div style="
-      width: 20px; 
-      height: 20px; 
+      width: ${baseSize}px; 
+      height: ${baseSize}px; 
       border-radius: 50%; 
       background-color: ${iconColors[damage] || '#808080'}; 
-      border: 2px solid white; 
-      box-shadow: 0 0 5px rgba(0,0,0,0.5);
+      border: 1px solid white;
     "></div>`,
-    iconSize: [30, 30],
-    iconAnchor: [15, 15]
+    iconSize: [baseSize, baseSize],
+    iconAnchor: [baseSize / 2, baseSize / 2],
   });
 };
 
-// Utility function to safely extract coordinates
+// Utility function to extract coordinates
 const extractCoordinates = (geojson) => {
   try {
     if (!geojson || !geojson.features || geojson.features.length === 0) {
@@ -59,22 +44,16 @@ const extractCoordinates = (geojson) => {
     }
 
     const firstFeature = geojson.features[0];
-    
-    // Handle different geometry types
     if (firstFeature.geometry.type === 'Point') {
       return [
-        firstFeature.geometry.coordinates[1], 
-        firstFeature.geometry.coordinates[0]
+        firstFeature.geometry.coordinates[1],
+        firstFeature.geometry.coordinates[0],
       ];
-    } else if (firstFeature.geometry.type === 'Polygon') {
-      const coords = firstFeature.geometry.coordinates[0][0];
-      return [coords[1], coords[0]];
     }
-    
-    return [35.6895, 139.6917]; // Fallback to default
+    return [35.6895, 139.6917]; // Default
   } catch (error) {
     console.error('Error extracting coordinates:', error);
-    return [35.6895, 139.6917]; // Fallback to default
+    return [35.6895, 139.6917]; // Default
   }
 };
 
@@ -95,7 +74,7 @@ const UploadForm = () => {
     setError(null);
 
     if (!file) {
-      setError("Please select a file to upload.");
+      setError('Please select a file to upload.');
       return;
     }
 
@@ -108,19 +87,15 @@ const UploadForm = () => {
       const response = await axios.post('http://127.0.0.1:8000/analyze-video', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      
-      // Validate response data
+
       if (!response.data || !response.data.geojson) {
         throw new Error('Invalid response from server');
       }
 
       setResponseData(response.data);
-      
-      // Safely extract and set map center
       const newCenter = extractCoordinates(response.data.geojson);
       setMapCenter(newCenter);
       setMapZoom(14);
-
     } catch (error) {
       console.error('Error uploading file:', error);
       setError(error.response?.data?.detail || 'Failed to analyze the video. Please try again.');
@@ -131,70 +106,49 @@ const UploadForm = () => {
 
   const summaryChartData = useMemo(() => {
     if (!responseData) return null;
-    
     return {
       labels: ['Very Poor', 'Poor', 'Satisfactory', 'Good'],
-      datasets: [{
-        label: 'Damage Severity (%)',
-        data: [
-          responseData.summary['very poor'] || 0,
-          responseData.summary['poor'] || 0,
-          responseData.summary['satisfactory'] || 0,
-          responseData.summary['good'] || 0,
-        ],
-        backgroundColor: ['#FF6384', '#FF9F40', '#FFCD56', '#36A2EB'],
-      }],
+      datasets: [
+        {
+          label: 'Damage Severity (%)',
+          data: [
+            responseData.summary['very poor'] || 0,
+            responseData.summary['poor'] || 0,
+            responseData.summary['satisfactory'] || 0,
+            responseData.summary['good'] || 0,
+          ],
+          backgroundColor: ['#FF6384', '#FF9F40', '#FFCD56', '#36A2EB'],
+        },
+      ],
     };
   }, [responseData]);
 
   const renderMap = useCallback(() => {
     if (!responseData || !responseData.geojson) return null;
 
-    const styleFeature = (feature) => {
-      const damage = feature.properties.damage;
-      const colorMap = {
-        'very poor': 'red',
-        'poor': 'orange',
-        'satisfactory': 'yellow',
-        'good': 'green'
-      };
-
-      return { 
-        color: colorMap[damage] || 'gray', 
-        weight: 3, 
-        fillColor: colorMap[damage] || 'gray', 
-        fillOpacity: 0.5 
-      };
-    };
+    const features = responseData.geojson.features;
+    const featureCount = features.length;
 
     return (
       <div className="map-container">
         <h3><FaRoad /> Damage Locations</h3>
-        <MapContainer 
-          key={`${mapCenter[0]}-${mapCenter[1]}`} // Force re-render on center change
-          center={mapCenter} 
-          zoom={mapZoom} 
+        <MapContainer
+          key={`${mapCenter[0]}-${mapCenter[1]}`}
+          center={mapCenter}
+          zoom={mapZoom}
           style={{ height: '500px', width: '100%' }}
         >
           <TileLayer
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           />
-          <GeoJSON 
-            data={responseData.geojson} 
-            style={styleFeature}
-          />
-          {responseData.geojson.features.map((feature, index) => {
-            // Safely handle different geometry types
-            const coordinates = feature.geometry.type === 'Point' 
-              ? feature.geometry.coordinates 
-              : feature.geometry.coordinates[0][0];
-
+          {features.map((feature, index) => {
+            const coordinates = feature.geometry.coordinates;
             return (
-              <Marker 
-                key={index} 
-                position={[coordinates[1], coordinates[0]]} 
-                icon={getDamageIcon(feature.properties.damage)}
+              <Marker
+                key={index}
+                position={[coordinates[1], coordinates[0]]}
+                icon={createDynamicIcon(feature.properties.damage, featureCount)}
               >
                 <Popup>
                   <div>
@@ -217,14 +171,8 @@ const UploadForm = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label><FaRoad /> Upload Dashcam Video</label>
-            <input 
-              type="file" 
-              onChange={handleFileChange} 
-              accept="video/*" 
-              className="file-input"
-            />
+            <input type="file" onChange={handleFileChange} accept="video/*" className="file-input" />
           </div>
-          
           <div className="form-group">
             <label><FaExclamationTriangle /> Damage Type</label>
             <input
@@ -235,40 +183,24 @@ const UploadForm = () => {
               className="damage-input"
             />
           </div>
-          
-          <button 
-            type="submit" 
-            disabled={loading} 
-            className="analyze-button"
-          >
+          <button type="submit" disabled={loading} className="analyze-button">
             {loading ? 'Analyzing...' : 'Analyze Video'}
           </button>
         </form>
-
-        {error && (
-          <div className="error-message">
-            <p>{error}</p>
-          </div>
-        )}
-
+        {error && <div className="error-message"><p>{error}</p></div>}
         {responseData && (
           <div className="results-container">
             <div className="chart-container">
               <h3><FaCheckCircle /> Damage Severity Overview</h3>
-              <Bar 
-                data={summaryChartData} 
+              <Bar
+                data={summaryChartData}
                 options={{
                   responsive: true,
-                  plugins: {
-                    legend: { display: true, position: 'top' },
-                  },
-                  scales: {
-                    y: { beginAtZero: true, max: 100 },
-                  },
-                }} 
+                  plugins: { legend: { display: true, position: 'top' } },
+                  scales: { y: { beginAtZero: true, max: 100 } },
+                }}
               />
             </div>
-
             {renderMap()}
           </div>
         )}
