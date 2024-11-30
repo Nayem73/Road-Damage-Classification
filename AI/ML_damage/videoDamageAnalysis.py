@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 from ML_damage.damageClassification import RoadDamageML
 from collections import Counter
+import random
 
 class VideoDamageAnalyzer:
     def __init__(self):
@@ -9,6 +10,55 @@ class VideoDamageAnalyzer:
         Initialize the video analyzer and the road damage classification model.
         """
         self.model = RoadDamageML()
+        
+        # E-Grid's location in Izumo, Shimane
+        self.start_latitude = 35.38673905468399
+        self.start_longitude = 132.73381553054398
+        
+        # Define geographic constraints for Izumo area
+        self.min_latitude = 35.38  # Minimal vertical variation
+        self.max_latitude = 35.39  # Minimal vertical variation
+        self.min_longitude = 132.73  # Western starting boundary
+        self.max_longitude = 132.76  # Eastern boundary
+
+    def generate_realistic_road_path(self, num_frames):
+        """
+        Generate a constrained, road-like path going east from Izumo.
+        
+        :param num_frames: Number of frames to generate geotags for
+        :return: List of geotags simulating a road trajectory
+        """
+        geotags = []
+        current_lat = self.start_latitude
+        current_lon = self.start_longitude
+        
+        # Road-like movement parameters for eastward movement
+        lat_step = 0.0001  # Minimal latitude change
+        lon_step = 0.0002   # More significant longitude (east) change
+        
+        for _ in range(num_frames):
+            # Add controlled randomness
+            lat_variation = random.uniform(-0.00005, 0.00005)
+            lon_variation = random.uniform(-0.00005, 0.00005)
+            
+            # Update coordinates with constraints
+            new_lat = current_lat + lat_step + lat_variation
+            new_lon = current_lon + lon_step + lon_variation
+            
+            # Enforce geographic boundaries
+            new_lat = max(self.min_latitude, min(new_lat, self.max_latitude))
+            new_lon = max(self.min_longitude, min(new_lon, self.max_longitude))
+            
+            # Update current coordinates
+            current_lat = new_lat
+            current_lon = new_lon
+            
+            geotags.append({
+                "latitude": current_lat, 
+                "longitude": current_lon
+            })
+        
+        return geotags
 
     def analyze_frame(self, frame, damage_type):
         """
@@ -26,27 +76,13 @@ class VideoDamageAnalyzer:
     def extract_geotags(self, video_path):
         """
         Extract geotags from the video metadata or simulate GPS data.
-        This is a placeholder that should be replaced with actual GPS integration.
-        
-        :param video_path: Path to the input video file.
-        :return: List of geotags (latitude, longitude) corresponding to video frames.
         """
-        # Simulating geotags for each frame (you can replace this with actual GPS extraction logic)
         num_frames = int(cv2.VideoCapture(video_path).get(cv2.CAP_PROP_FRAME_COUNT))
-        geotags = [
-            {"latitude": 35.6895 + (i * 0.0001), "longitude": 139.6917 + (i * 0.0001)}
-            for i in range(num_frames)
-        ]
-        return geotags
+        return self.generate_realistic_road_path(num_frames)
 
     def analyze_video(self, video_path, damage_type, frame_skip=5):
         """
         Analyze a video and classify each frame for road damage.
-        
-        :param video_path: Path to the input video file.
-        :param damage_type: Type of damage to classify (e.g., 'Road').
-        :param frame_skip: Number of frames to skip between analyses for efficiency.
-        :return: Dictionary with summary percentages for each damage type and geotags.
         """
         cap = cv2.VideoCapture(video_path)
         if not cap.isOpened():

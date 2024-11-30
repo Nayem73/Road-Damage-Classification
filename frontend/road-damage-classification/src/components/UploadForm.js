@@ -4,8 +4,20 @@ import { MapContainer, TileLayer, GeoJSON, Marker, Popup } from 'react-leaflet';
 import { Bar } from 'react-chartjs-2';
 import 'leaflet/dist/leaflet.css';
 import 'chart.js/auto';
+import L from 'leaflet';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import { Icon } from 'leaflet';
 import { FaRoad, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
+
+// Reset Leaflet's default icon
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: markerIcon2x,
+    iconUrl: markerIcon,
+    shadowUrl: markerShadow,
+});
 
 // Utility function to safely extract coordinates
 const extractCoordinates = (geojson) => {
