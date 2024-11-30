@@ -7,11 +7,6 @@ import 'chart.js/auto';
 import L from 'leaflet';
 import { FaRoad, FaExclamationTriangle, FaCheckCircle } from 'react-icons/fa';
 
-// Import default Leaflet icons explicitly
-import iconUrl from 'leaflet/dist/images/marker-icon.png';
-import iconRetinaUrl from 'leaflet/dist/images/marker-icon-2x.png';
-import shadowUrl from 'leaflet/dist/images/marker-shadow.png';
-
 // Utility to create dynamic icon sizes based on feature count
 const createDynamicIcon = (damage, featureCount) => {
   const iconColors = {
