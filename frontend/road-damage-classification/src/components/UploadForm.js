@@ -146,8 +146,8 @@ const UploadForm = () => {
                 <Popup>
                   <div>
                     <strong>Damage Level:</strong> {feature.properties.damage}
-                    <br />
-                    <strong>Area:</strong> {feature.properties.area || 'N/A'} sq m
+                    {/* <br /> */}
+                    {/* <strong>Area:</strong> {feature.properties.area || 'N/A'} sq m */}
                   </div>
                 </Popup>
               </Marker>
